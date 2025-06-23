@@ -1,0 +1,27 @@
+package src.gymapp.model;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "quote")
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class Quote {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @ManyToOne
+    private UserDto user;
+
+    private String text;
+    private LocalDateTime timestamp;
+}
