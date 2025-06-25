@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
-
+import {useRouter} from "next/navigation";
+import { toast } from "sonner"
 const colors = [
     '#2196F3', '#32c787', '#00BCD4', '#ff5652',
     '#ffc107', '#ff85af', '#FF9800', '#39bbb0'
@@ -18,48 +19,91 @@ function getAvatarColor(sender) {
 }
 
 export default function ChatApp() {
+    const router = useRouter();
     const [username, setUsername] = useState('');
     const [enteredUsername, setEnteredUsername] = useState(false);
     const [connecting, setConnecting] = useState(false);
     const [messages, setMessages] = useState([]);
     const [messageInput, setMessageInput] = useState('');
-
     const stompClient = useRef(null);
     const messageAreaRef = useRef(null);
+    const [receiver, setReceiver] = useState('');
 
     useEffect(() => {
         if (messageAreaRef.current) {
             messageAreaRef.current.scrollTop = messageAreaRef.current.scrollHeight;
         }
     }, [messages]);
+    useEffect(() => {
+        if (username && receiver && !enteredUsername) {
+            connect(username);
+        }
+    }, [username, receiver]);
+
+    useEffect(() => {
+        const storedUsername = localStorage.getItem("username");
+        const storedTrainerUsername = localStorage.getItem("trainerUsername");
+        const storedClientUsername = localStorage.getItem("clientUsername");
+
+        if (storedUsername) {
+            setUsername(storedUsername);
+
+            if (storedUsername === storedTrainerUsername && storedClientUsername) {
+                setReceiver(storedClientUsername);
+            } else if (storedTrainerUsername) {
+                setReceiver(storedTrainerUsername);
+            }
+        }
+        else {
+            toast("Login first")
+            router.push("/auth/login")
+        }
+    }, []);
+
+
+
+    useEffect(() => {
+        if (username && !enteredUsername) {
+            connect(username);
+        }
+    }, [username]);
+
 
     const connect = (e) => {
-        e.preventDefault();
+        // e.preventDefault();
         if (!username.trim()) return;
 
         setConnecting(true);
 
         const socket = new SockJS('http://localhost:8080/ws');
         stompClient.current = new Client({
-            webSocketFactory: () => socket,
+            webSocketFactory: () => new SockJS("http://localhost:8080/ws"),
+            connectHeaders: {
+                username: username,
+            },
             debug: (str) => {
                 // console.log(str);
             },
             onConnect: () => {
-                stompClient.current.subscribe('/user/queue/messages', onMessageReceived); // Private message receiver
+                stompClient.current.subscribe("/user/queue/messages", onMessageReceived);
 
                 stompClient.current.publish({
-                    destination: '/app/chat.addUser',
-                    body: JSON.stringify({ sender: username, type: 'JOIN' }),
+                    destination: "/app/chat.addUser",
+                    body: JSON.stringify({
+                        sender: username,
+                        receiver: receiver,
+                        type: "JOIN",
+                    }),
                 });
+
 
                 setEnteredUsername(true);
                 setConnecting(false);
             },
-
             onStompError: (frame) => {
+                console.error("STOMP error:", frame);
+                toast("could not connect")
                 setConnecting(false);
-                alert('Could not connect to WebSocket server. Please refresh this page to try again!');
             },
         });
 
@@ -71,12 +115,15 @@ export default function ChatApp() {
         if (messageInput.trim() && stompClient.current) {
             const chatMessage = {
                 sender: username,
+                receiver: receiver,
                 content: messageInput,
-                type: 'CHAT',
+                type: "CHAT",
             };
 
+            setMessages((prev) => [...prev, chatMessage]);
+
             stompClient.current.publish({
-                destination: '/app/chat.sendMessage',
+                destination: "/app/chat.sendMessage",
                 body: JSON.stringify(chatMessage),
             });
 
@@ -84,37 +131,27 @@ export default function ChatApp() {
         }
     };
 
+
+
+
     const onMessageReceived = (message) => {
         const msg = JSON.parse(message.body);
+        console.log("Message received on frontend:", msg);
+
+        if (msg.type === "JOIN" && msg.sender !== username) {
+            console.log("Storing clientUsername for trainer:", msg.sender);
+            localStorage.setItem("clientUsername", msg.sender);
+            setReceiver(msg.sender); // 🔁 update receiver on the trainer side
+        }
+
         setMessages((prev) => [...prev, msg]);
     };
 
-    return (
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-            {!enteredUsername && (
-                <div className="bg-white shadow-lg rounded-lg p-8 max-w-md w-full text-center">
-                    <h1 className="text-2xl font-semibold mb-6">Type your username to enter the Chatroom</h1>
-                    <form onSubmit={connect}>
-                        <input
-                            type="text"
-                            placeholder="Username"
-                            autoComplete="off"
-                            className="bg-blue-600 w-full border border-gray-300 rounded-md px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                        />
-                        <button
-                            type="submit"
-                            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
-                            disabled={connecting}
-                        >
-                            {connecting ? 'Connecting...' : 'Start Chatting'}
-                        </button>
-                    </form>
-                </div>
-            )}
 
-            {enteredUsername && (
+    return (
+        <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 text-black">
+
+
                 <div className="bg-white shadow-lg rounded-lg max-w-3xl w-full flex flex-col h-[600px]">
                     <header className="p-4 border-b border-gray-300 text-center font-semibold text-lg">
                         Spring WebSocket Chat Demo - By Alibou
@@ -139,22 +176,25 @@ export default function ChatApp() {
                                     </p>
                                 );
                             } else {
+                                const isOwnMessage = message.sender === username;
+
                                 return (
-                                    <div key={idx} className="flex items-start space-x-3">
-                                        <div
-                                            className="flex-shrink-0 rounded-full h-10 w-10 flex items-center justify-center text-white font-bold uppercase"
-                                            style={{ backgroundColor: getAvatarColor(message.sender) }}
-                                        >
-                                            {message.sender[0]}
-                                        </div>
-                                        <div>
-                                            <span className="font-semibold text-gray-900">{message.sender}</span>
-                                            <p className="text-gray-700">{message.content}</p>
+                                    <div
+                                        key={idx}
+                                        className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
+                                    >
+                                        <div className={`max-w-[75%] p-3 rounded-lg shadow
+                    ${isOwnMessage ? 'bg-green-100 text-right' : 'bg-blue-100 text-left'}`}>
+                                            <div className="text-xs text-gray-500 font-semibold mb-1">
+                                                {message.sender}
+                                            </div>
+                                            <div className="text-sm">{message.content}</div>
                                         </div>
                                     </div>
                                 );
                             }
                         })}
+
                     </div>
 
                     <form
@@ -177,7 +217,6 @@ export default function ChatApp() {
                         </button>
                     </form>
                 </div>
-            )}
         </div>
     );
 }

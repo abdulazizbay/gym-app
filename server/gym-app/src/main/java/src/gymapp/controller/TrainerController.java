@@ -26,8 +26,7 @@ public class TrainerController {
             Trainer savedTrainer  =  trainerService.addTrainer(trainer);
             return new ResponseEntity<>(savedTrainer, HttpStatus.CREATED);
         } catch (Exception e) {
-            // Print the actual error to the console
-            e.printStackTrace();  // <---- this is crucial for debugging
+            e.printStackTrace();
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while saving trainer", e);
         }
     }

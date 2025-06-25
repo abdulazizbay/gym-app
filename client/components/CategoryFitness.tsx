@@ -42,7 +42,7 @@ export const CategoryFitness = ()=>{
                                     </CardContent>
                                     <CardFooter className="absolute bottom-10">
                                         <CustomButton
-                                            onClick={() => router.push("/chat")}
+                                            onClick={() => router.push(item.navigateTo)}
 
                                             label="Get Started"
                                             width={127}
@@ -79,7 +79,7 @@ export const FITNESSCATEGORYCARDS = [
     {
         icon: CARDIOICON,
         title: "Trainer & Coaching Features",
-        navigateTo:"/choose-trainer",
+        navigateTo:"/chat/choose-trainer",
         desc: "Connect with certified trainers, receive personalized coaching, and get ongoing support to help you reach your fitness goals."
     },
     {

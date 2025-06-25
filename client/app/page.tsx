@@ -12,7 +12,6 @@ export default function Home() {
         <Banner/>
         <CompaniesBanner/>
       <CategoryFitness/>
-        <TrainerChoose/>
     </>
   );
 }

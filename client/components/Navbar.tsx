@@ -27,8 +27,12 @@ export const Navbar = ()=>{
                         ))}
                     </ul>
                     <div className="flex gap-3">
-                        <CustomButton rounded={18} label="Log in" width={86} height={47} backColor="transparent" fontSize="base" bold={true}/>
-                        <CustomButton rounded={18} label="Sign Up" width={99} height={47} backColor="orange" fontSize="base" bold={true}/>
+                        <Link href="/auth/login">
+                            <CustomButton rounded={18}  label="Log in" width={86} height={47} backColor="transparent" fontSize="base" bold={true}/>
+                        </Link>
+                        <Link href="/auth/signup">
+                            <CustomButton rounded={18} label="Sign Up" width={99} height={47} backColor="orange" fontSize="base" bold={true}/>
+                        </Link>
                     </div>
                 </div>
             </div>

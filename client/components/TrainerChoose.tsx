@@ -10,12 +10,14 @@ import {
     CardTitle
 } from "@/components/ui/card";
 import { CustomButton } from "@/components/CustomButton";
+import {useRouter} from "next/navigation";
 
 export const TrainerChoose = () => {
+    const router = useRouter()
     const [allTrainers, setAllTrainer] = useState([
         {
             id: 1,
-            username: "John Wick",
+            username: "xudayarov",
             bio: "Certified fitness coach with 5 years of experience.",
             hourlyRate: 25,
             hourlyWage: 20
@@ -37,20 +39,23 @@ export const TrainerChoose = () => {
     ]);
 
     const [loading, setLoading] = useState(false);
+    const handleChooseTrainer = (trainerUsername)=>{
+        localStorage.setItem("trainerUsername", trainerUsername)
+        router.push("/chat")
+    }
 
-    // Uncomment if backend is working:
-    // useEffect(() => {
-    //   axios
-    //     .get("http://localhost:8080/api/trainer/getAllTrainers")
-    //     .then((response) => {
-    //       setAllTrainer(response.data);
-    //       setLoading(false);
-    //     })
-    //     .catch((error) => {
-    //       console.error(error);
-    //       setLoading(false);
-    //     });
-    // }, []);
+    useEffect(() => {
+      axios
+        .get("http://localhost:8080/api/trainer/getAllTrainers")
+        .then((response) => {
+          setAllTrainer(response.data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error(error);
+          setLoading(false);
+        });
+    }, []);
 
     return (
         <div className="bg-gray-100 min-h-screen py-10 px-4 max-container-l  ">
@@ -75,13 +80,14 @@ export const TrainerChoose = () => {
                             </CardContent>
                             <CardFooter className="p-6">
                                 <CustomButton
-                                    label="Get Started"
+                                    label="Chat Trainer"
                                     width={127}
                                     height={47}
                                     rounded={18}
                                     fontSize="base"
                                     bold={true}
                                     backColor="orange"
+                                    onClick={()=>handleChooseTrainer(item.username)}
                                 />
                             </CardFooter>
                         </Card>

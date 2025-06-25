@@ -1,28 +1,72 @@
-package src.gymapp.controller;
+    package src.gymapp.controller;
 
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.stereotype.Controller;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import src.gymapp.model.ChatMessage;
+    import lombok.extern.slf4j.Slf4j;
+    import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+    import org.springframework.messaging.handler.annotation.MessageMapping;
+    import org.springframework.stereotype.Controller;
+    import org.springframework.messaging.simp.SimpMessagingTemplate;
+    import src.gymapp.model.ChatMessage;
+    import java.util.Map;
 
-@Controller
-public class ChatController {
+    import lombok.extern.slf4j.Slf4j;
+    import org.springframework.messaging.handler.annotation.MessageMapping;
+    import org.springframework.messaging.simp.SimpMessagingTemplate;
+    import org.springframework.stereotype.Controller;
+    import src.gymapp.model.ChatMessage;
 
-    private final SimpMessagingTemplate messagingTemplate;
+    import lombok.extern.slf4j.Slf4j;
+    import org.springframework.messaging.handler.annotation.MessageMapping;
+    import org.springframework.messaging.simp.SimpMessagingTemplate;
+    import org.springframework.stereotype.Controller;
+    import java.util.concurrent.ConcurrentHashMap;
 
-    public ChatController(SimpMessagingTemplate messagingTemplate) {
-        this.messagingTemplate = messagingTemplate;
+    @Slf4j
+    @Controller
+    public class ChatController {
+
+        private final SimpMessagingTemplate messagingTemplate;
+
+        private final ConcurrentHashMap<String, String> trainerClientMap = new ConcurrentHashMap<>();
+
+        public ChatController(SimpMessagingTemplate messagingTemplate) {
+            this.messagingTemplate = messagingTemplate;
+        }
+
+        @MessageMapping("/chat.sendMessage")
+        public void sendPrivateMessage(ChatMessage message) {
+            log.info("📨 Message from '{}' to '{}': {}", message.getSender(), message.getReceiver(), message.getContent());
+
+            messagingTemplate.convertAndSendToUser(
+                    message.getReceiver(),
+                    "/queue/messages",
+                    message
+            );
+        }
+
+        @MessageMapping("/chat.addUser")
+        public void addUser(ChatMessage message) {
+            log.info("✅ User '{}' joined the chat.", message.getSender());
+
+            if (message.getReceiver() == null || message.getReceiver().isEmpty()) {
+                log.warn("⚠️ Receiver is null or empty. Skipping notify step.");
+                return;
+            }
+
+            log.info("🔔 Notifying '{}' that '{}' joined.", message.getReceiver(), message.getSender());
+
+            trainerClientMap.put(message.getReceiver(), message.getSender());
+
+            messagingTemplate.convertAndSendToUser(
+                    message.getReceiver(),
+                    "/queue/messages",
+                    message
+            );
+        }
+
+
+        public String getClientForTrainer(String trainerUsername) {
+            return trainerClientMap.get(trainerUsername);
+        }
     }
 
-    @MessageMapping("/chat.sendMessage")
-    public void sendPrivateMessage(ChatMessage message) {
-        String receiver = message.getReceiver();
-        messagingTemplate.convertAndSendToUser(receiver, "/queue/messages", message);
-    }
 
-    @MessageMapping("/chat.addUser")
-    public void addUser(ChatMessage message, SimpMessageHeaderAccessor accessor) {
-        accessor.getSessionAttributes().put("username", message.getSender());
-    }
-}

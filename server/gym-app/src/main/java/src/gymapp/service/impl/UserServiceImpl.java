@@ -35,12 +35,18 @@ public class UserServiceImpl implements UserService {
     }
     @Transactional
     @Override
-    public String login (LoginRequest request, HttpSession session){
+    public String login(LoginRequest request, HttpSession session) {
         Optional<UserDto> userOpt = userRepository.findByEmail(request.getEmail());
-        if (userOpt.isEmpty() || !userOpt.get().getPassword().equals(request.getPassword())) {
-            throw new RuntimeException( "Invalid email or password");
+
+        if (userOpt.isEmpty() || !userOpt.get().getPassword().equals(request.getPassword()) || !userOpt.get().getUsername().equals(request.getUsername()) ) {
+            throw new RuntimeException("Invalid email, username or  password");
         }
-        session.setAttribute("userId" , userOpt.get().getId());
-        return "logged in";
+
+        UserDto user = userOpt.get();
+        session.setAttribute("userId", user.getId());
+
+        // return JSON manually
+        return "{\"username\":\"" + user.getUsername() + "\", \"role\":\"" + user.getRole() + "\"}";
     }
+
 }

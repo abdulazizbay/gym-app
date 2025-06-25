@@ -1,4 +1,4 @@
-// UserDto.java
+
 package src.gymapp.model;
 
 import jakarta.persistence.*;

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner"
 import "./globals.css";
 import { Inter } from 'next/font/google'
 
@@ -21,6 +21,7 @@ export default function RootLayout({
       <body
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );
