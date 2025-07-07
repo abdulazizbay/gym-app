@@ -1,10 +1,12 @@
 "use client";
 import React, { useState } from "react";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import {toast} from "sonner";
+import {useHttp} from "@/hooks/UseHttp";
 
 export default function LoginForm() {
+    const {request} = useHttp();
     const router = useRouter();
 
     const [form, setForm] = useState({
@@ -13,8 +15,6 @@ export default function LoginForm() {
         password: ""
     });
 
-    const [error, setError] = useState("");
-    const [user, setUser] = useState(null);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -22,25 +22,26 @@ export default function LoginForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError("");
 
         try {
-            const res = await axios.post("http://localhost:8080/api/users/login", {
+            const res = await request("http://localhost:8080/api/user/login","GET", {
                 email: form.email,
                 password: form.password,
                 username: form.username
             }, {
                 withCredentials: true,
             });
-
             const data = typeof res.data === "string" ? JSON.parse(res.data) : res.data;
 
-            localStorage.setItem("username", data.username);
-            setUser(data);
-            router.push("/")
-            alert(`Welcome, ${data.username} (${data.role})`);
+            if(data.token){
+                localStorage.setItem("token", data.token);
+                router.push("/")
+            }else {
+                toast("Login failed: no token received.")
+            }
+
         } catch (err) {
-            setError(err.response?.data || "Login failed");
+            console.log(err)
         }
     };
 
@@ -52,9 +53,6 @@ export default function LoginForm() {
             >
                 <h2 className="text-2xl font-bold mb-6 text-center">Sign In</h2>
 
-                {error && (
-                    <p className="text-red-600 text-center mb-4">{error}</p>
-                )}
 
                 <input
                     type="email"

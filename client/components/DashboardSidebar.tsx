@@ -16,12 +16,12 @@ const navItems = [
     {
         label: 'Admins',
         icon: <Home size={20} />,
-        href: '/',
+        href: '/admin-dashboard/admins',
     },
     {
         label: 'Trainers',
         icon: <Settings size={20} />,
-        href: '/settings',
+        href: '/admin-dashboard/trainers',
     },
 ]
 
@@ -33,7 +33,7 @@ const collapsibleGroup = {
     ],
 }
 
-export default function AdminDashboard() {
+export default function DashboardSidebar() {
     const [collapsed, setCollapsed] = useState(false)
     const [groupOpen, setGroupOpen] = useState(false)
 

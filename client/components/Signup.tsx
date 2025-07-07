@@ -2,13 +2,14 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Link from "next/link";
+import {useHttp} from "@/hooks/UseHttp";
 
 export default function SignUpForm() {
+    const {request} = useHttp()
     const [form, setForm] = useState({
         username: "",
         email: "",
         password: "",
-        role: "USER",
     });
 
     const handleChange = (e) => {
@@ -18,10 +19,10 @@ export default function SignUpForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post("http://localhost:8080/api/users/register", form);
-            alert(res.data);
+            const res = await request("/api/client/register", "POST" , form);
+            console.log(res.data);
         } catch (err) {
-            alert(err.response?.data || "Error occurred");
+            console.log(err.response?.data || "Error occurred");
         }
     };
 
@@ -63,17 +64,7 @@ export default function SignUpForm() {
                     required
                 />
 
-                <select
-                    name="role"
-                    value={form.role}
-                    onChange={handleChange}
-                    className="w-full mb-6 px-4 py-2 border rounded"
-                    required
-                >
-                    <option value="USER">User</option>
-                    <option value="TRAINER">Trainer</option>
-                    <option value="ADMIN">Admin</option>
-                </select>
+
 
                 <button
                     type="submit"

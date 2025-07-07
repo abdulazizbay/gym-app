@@ -141,7 +141,7 @@ export default function ChatApp() {
         if (msg.type === "JOIN" && msg.sender !== username) {
             console.log("Storing clientUsername for trainer:", msg.sender);
             localStorage.setItem("clientUsername", msg.sender);
-            setReceiver(msg.sender); // 🔁 update receiver on the trainer side
+            setReceiver(msg.sender);
         }
 
         setMessages((prev) => [...prev, msg]);
