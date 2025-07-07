@@ -20,7 +20,7 @@ public class Quote {
     private Long id;
 
     @ManyToOne
-    private UserDto user;
+    private User user;
 
     private String text;
     private LocalDateTime timestamp;

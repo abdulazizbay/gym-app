@@ -4,13 +4,9 @@ package src.gymapp.service.impl;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import src.gymapp.model.Quote;
 import src.gymapp.model.Trainer;
-import src.gymapp.model.UserDto;
-import src.gymapp.repository.QuoteRepository;
 import src.gymapp.repository.TrainerRepository;
-import src.gymapp.repository.UserRepository;
-import src.gymapp.service.QuoteService;
+import src.gymapp.repository.ClientRepository;
 import src.gymapp.service.TrainerService;
 
 import java.util.List;
@@ -21,7 +17,7 @@ public class TrainerServiceImpl implements TrainerService {
     @Autowired
     private TrainerRepository trainerRepository;
     @Autowired
-    private UserRepository userRepository;
+    private ClientRepository userRepository;
 
     @Transactional
     @Override
@@ -45,6 +41,5 @@ public class TrainerServiceImpl implements TrainerService {
     @Override
     public List<Trainer> getAllTrainers (){
         return trainerRepository.findAll();
-
     }
 }

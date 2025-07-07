@@ -4,9 +4,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import src.gymapp.model.Quote;
-import src.gymapp.model.UserDto;
+import src.gymapp.model.User;
 import src.gymapp.repository.QuoteRepository;
-import src.gymapp.repository.UserRepository;
+import src.gymapp.repository.ClientRepository;
 import src.gymapp.service.QuoteService;
 
 import java.util.Optional;
@@ -16,7 +16,7 @@ public class QuoteServiceImpl implements QuoteService {
     @Autowired
     public QuoteRepository quoteRepository;
     @Autowired
-    private UserRepository userRepository;
+    private ClientRepository userRepository;
 
     @Transactional
     @Override
@@ -27,7 +27,7 @@ public class QuoteServiceImpl implements QuoteService {
         }
 
         Long userId = quote.getUser().getId();
-        Optional<UserDto> user = userRepository.findById(userId);
+        Optional<User> user = userRepository.findById(userId);
 
         if (user.isEmpty()) {
             throw new RuntimeException("User not found");

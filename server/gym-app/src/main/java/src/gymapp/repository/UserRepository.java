@@ -1,10 +1,13 @@
 package src.gymapp.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import src.gymapp.model.UserDto;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+import src.gymapp.model.User;
 
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<UserDto,Long> {
-    public Optional<UserDto> findByEmail(String email);
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByEmail(String email);
 }

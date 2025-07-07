@@ -38,6 +38,6 @@ public class BodyProfile {
     @Lob
     private byte[] photo;
     @OneToOne
-    private UserDto user;
+    private User user;
 
 }

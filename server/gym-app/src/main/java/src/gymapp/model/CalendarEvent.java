@@ -20,5 +20,5 @@ public class CalendarEvent {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     @ManyToOne
-    private UserDto user;
+    private User user;
 }

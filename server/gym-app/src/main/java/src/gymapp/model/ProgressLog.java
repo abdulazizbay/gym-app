@@ -22,6 +22,6 @@ public class ProgressLog {
     private double bodyFatPercentage;
 
     @ManyToOne
-    private UserDto user;
+    private User user;
 
 }
