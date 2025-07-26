@@ -4,6 +4,8 @@ package src.gymapp.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import src.gymapp.model.Quote;
@@ -17,20 +19,26 @@ import java.util.List;
 @RequestMapping("api/trainer")
 public class TrainerController {
 
-    @Autowired
-    public TrainerService trainerService;
+    private final TrainerService trainerService;
 
-    @PostMapping("/add")
-    public ResponseEntity<Trainer> addTrainer(@RequestBody Trainer trainer){
-        try {
-            Trainer savedTrainer  =  trainerService.addTrainer(trainer);
-            return new ResponseEntity<>(savedTrainer, HttpStatus.CREATED);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while saving trainer", e);
-        }
+    public TrainerController(TrainerService trainerService) {
+        this.trainerService = trainerService;
     }
 
+
+    @PostMapping
+    public ResponseEntity<?> addTrainer(@RequestBody Trainer trainer) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only admins can add trainers");
+        }
+
+        trainerService.addTrainer(trainer);
+        return ResponseEntity.ok("Trainer added successfully");
+    }
     @GetMapping("/getAllTrainers")
     public ResponseEntity<List<Trainer>> getAllTrainers() {
         try {

@@ -24,7 +24,14 @@ export const Banner = ()=>{
                     </h4>
                     <div className="mt-[60px] flexBetween">
                         <Input type="email" placeholder="Enter Your Email Here" className="w-[350px]"/>
-                        <CustomButton bold={false} width={225} height={50} fontSize="xl_22" label="Get Started" rounded={25} backColor="orange"/>
+                        <CustomButton
+                            width="225"
+                            height="50"
+                            fontSize="xl_22"
+                            label="Get Started"
+                            rounded="25"
+                            backColor="orange"
+                        />
                     </div>
                 </div>
 

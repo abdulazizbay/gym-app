@@ -25,5 +25,8 @@ public class Admin extends User {
     }
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Trainer> addedTrainers = new ArrayList<>();
-
+    @Override
+    public String getRole() {
+        return "ADMIN";
+    }
 }

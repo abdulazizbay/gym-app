@@ -3,6 +3,7 @@ package src.gymapp.service.impl;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import src.gymapp.model.Admin;
 import src.gymapp.repository.AdminRepository;
@@ -16,6 +17,9 @@ import java.util.Optional;
 public class AdminServiceImpl implements AdminService {
     @Autowired
     private AdminRepository adminRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Transactional
     @Override
     public Admin addAdmin(Admin admin) {
@@ -29,8 +33,11 @@ public class AdminServiceImpl implements AdminService {
             throw new RuntimeException("This username already exists");
         }
 
+        admin.setPassword(passwordEncoder.encode(admin.getPassword()));
+
         return adminRepository.save(admin);
     }
+
 
     @Transactional
     @Override

@@ -10,7 +10,8 @@ import java.util.Optional;
 @Repository
 public interface AdminRepository extends JpaRepository<Admin,Long> {
     Optional<Admin> findByUsername(String username);
-    @Query(value = "SELECT COUNT(*) FROM admin WHERE super_admin = true", nativeQuery = true)
+    @Query("SELECT COUNT(a) FROM Admin a WHERE a.super_admin = true")
     int numberOfSuperAdmin();
+
 
 }

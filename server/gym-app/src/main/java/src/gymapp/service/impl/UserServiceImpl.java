@@ -5,8 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import src.gymapp.config.JwtUtil;
-import src.gymapp.model.LoginRequest;
-import src.gymapp.model.User;
+import src.gymapp.model.*;
 import src.gymapp.repository.UserRepository;
 import src.gymapp.service.UserService;
 
@@ -14,29 +13,38 @@ import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
-    @Autowired
-    private JwtUtil jwtUtil;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
 
-     @Autowired
-     private UserRepository userRepository;
+    public UserServiceImpl(JwtUtil jwtUtil, PasswordEncoder passwordEncoder, UserRepository userRepository) {
+        this.jwtUtil = jwtUtil;
+        this.passwordEncoder = passwordEncoder;
+        this.userRepository = userRepository;
+    }
 
-    @Transactional
     @Override
     public String login(LoginRequest request) {
-        Optional <User> userOpt = userRepository.findByEmail(request.getEmail());
-        if(userOpt.isEmpty()){
-            return "User not found";
-        }
-        User user = userOpt.get();
-        if (!user.getUsername().equals(request.getUsername()) ||
-                !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
 
-        return jwtUtil.generateToken(user.getEmail());
+
+        return jwtUtil.generateToken(user.getEmail(), getRole(user));
+
+
     }
 
+    private String getRole(User user) {
+        if (user instanceof Admin) return "ADMIN";
+        if (user instanceof Trainer) return "TRAINER";
+        if (user instanceof Client) return "CLIENT";
+        return "USER";
+    }
 }
+
+

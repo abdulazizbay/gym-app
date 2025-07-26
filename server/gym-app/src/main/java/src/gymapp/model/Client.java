@@ -30,6 +30,10 @@ public class Client extends User {
     @JoinColumn(name = "trainer_id")
     private Trainer trainer;
 
+    @Override
+    public String getRole() {
+        return "CLIENT";
+    }
 //    @OneToMany(mappedBy = "sender")
 //    private List<Message> messagesSent = new ArrayList<>();
 

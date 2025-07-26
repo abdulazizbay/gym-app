@@ -27,4 +27,9 @@ public class Trainer extends User {
     @ManyToOne
     @JoinColumn(name = "admin_id")
     private Admin admin;
+
+    @Override
+    public String getRole() {
+        return "TRAINER";
+    }
 }

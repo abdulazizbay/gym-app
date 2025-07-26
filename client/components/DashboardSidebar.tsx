@@ -40,31 +40,33 @@ export default function DashboardSidebar() {
     return (
         <aside
             className={clsx(
-                'h-screen transition-all duration-300 bg-[#1B1B1B] text-white p-4',
+                'h-screen transition-all duration-300 bg-gradient-to-b from-[#0f172a] to-[#1e293b] text-white shadow-xl px-4 py-6',
                 collapsed ? 'w-16' : 'w-64'
             )}
         >
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                {!collapsed && <h1 className="text-xl font-bold text-orange-500">MyApp</h1>}
+            <div className="flex items-center justify-between mb-8">
+                {!collapsed && (
+                    <h1 className="text-2xl font-bold text-blue-400 tracking-wide">Dashboard</h1>
+                )}
                 <button
                     onClick={() => setCollapsed(!collapsed)}
-                    className="text-white focus:outline-none"
+                    className="text-gray-400 hover:text-blue-400 transition"
                 >
-                    <Menu size={20} />
+                    <Menu size={22} />
                 </button>
             </div>
 
             {/* Navigation */}
-            <nav className="space-y-2">
+            <nav className="space-y-3">
                 {navItems.map((item) => (
                     <Link
                         key={item.label}
                         href={item.href}
-                        className="flex items-center space-x-3 p-2 rounded-md hover:bg-orange-500 transition"
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-600 hover:text-white transition"
                     >
                         <span>{item.icon}</span>
-                        {!collapsed && <span>{item.label}</span>}
+                        {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
                     </Link>
                 ))}
 
@@ -72,22 +74,26 @@ export default function DashboardSidebar() {
                 <div>
                     <button
                         onClick={() => setGroupOpen(!groupOpen)}
-                        className="w-full flex items-center justify-between p-2 rounded-md hover:bg-orange-500 transition"
+                        className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-blue-600 transition"
                     >
-            <span className="flex items-center space-x-3">
-              <Settings size={20} />
-                {!collapsed && <span>{collapsibleGroup.label}</span>}
-            </span>
+                        <span className="flex items-center space-x-3">
+                            <Settings size={20} />
+                            {!collapsed && (
+                                <span className="text-sm font-medium">
+                                    {collapsibleGroup.label}
+                                </span>
+                            )}
+                        </span>
                         {!collapsed &&
                             (groupOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />)}
                     </button>
                     {groupOpen && !collapsed && (
-                        <div className="ml-7 mt-1 space-y-1">
+                        <div className="ml-8 mt-1 space-y-1">
                             {collapsibleGroup.items.map((item) => (
                                 <Link
                                     key={item.label}
                                     href={item.href}
-                                    className="block text-sm hover:text-orange-500 transition"
+                                    className="block text-sm text-gray-300 hover:text-blue-400 transition"
                                 >
                                     {item.label}
                                 </Link>
@@ -98,10 +104,10 @@ export default function DashboardSidebar() {
             </nav>
 
             {/* Footer */}
-            <div className="absolute bottom-4 left-4 right-4">
-                <button className="w-full flex items-center space-x-3 p-2 rounded-md text-red-500 hover:bg-red-500 hover:text-white transition">
+            <div className="absolute bottom-6 left-4 right-4">
+                <button className="w-full flex items-center space-x-3 p-3 rounded-lg text-red-400 hover:bg-red-500 hover:text-white transition">
                     <LogOut size={20} />
-                    {!collapsed && <span>Logout</span>}
+                    {!collapsed && <span className="text-sm font-medium">Logout</span>}
                 </button>
             </div>
         </aside>
