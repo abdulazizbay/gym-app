@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner"
 import "./globals.css";
-import { Inter } from 'next/font/google'
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -9,7 +8,6 @@ export const metadata: Metadata = {
 };
 
 
-const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700'] })
 
 export default function RootLayout({
   children,

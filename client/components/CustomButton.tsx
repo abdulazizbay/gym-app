@@ -66,6 +66,7 @@ const btnRounded = {
     "18":"rounded-[18px]",
     "20":"rounded-[20px]",
     "25":"rounded-[25px]",
+    "full":"rounded-full"
 }
 const btnColorText = {
     "white":"text-white",

@@ -1,96 +1,113 @@
-"use client"
+"use client";
 import { useEffect, useState } from "react";
-import axios from "axios";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle
-} from "@/components/ui/card";
+import { useRouter } from "next/navigation";
+import { useHttp } from "@/hooks/UseHttp";
 import { CustomButton } from "@/components/CustomButton";
-import {useRouter} from "next/navigation";
+import {
+    DollarSign,
+    Info,
+    Mail,
+    Users,
+    UserCircle
+} from "lucide-react";
 
 export const TrainerChoose = () => {
-    const router = useRouter()
-    const [allTrainers, setAllTrainer] = useState([
-        {
-            id: 1,
-            username: "xudayarov",
-            bio: "Certified fitness coach with 5 years of experience.",
-            hourlyRate: 25,
-            hourlyWage: 20
-        },
-        {
-            id: 2,
-            username: "Sarah Connor",
-            bio: "Expert in HIIT and strength training. 8 years in the industry.",
-            hourlyRate: 30,
-            hourlyWage: 22
-        },
-        {
-            id: 3,
-            username: "Sarah Connor",
-            bio: "Expert in HIIT and strength training. 8 years in the industry.",
-            hourlyRate: 30,
-            hourlyWage: 22
-        }
-    ]);
+    const { request } = useHttp();
+    const router = useRouter();
+    const [allTrainers, setAllTrainer] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const [loading, setLoading] = useState(false);
-    const handleChooseTrainer = (trainerUsername)=>{
-        localStorage.setItem("trainerUsername", trainerUsername)
-        router.push("/chat")
-    }
+    const handleChooseTrainer = (trainerUsername: string) => {
+        localStorage.setItem("trainerUsername", trainerUsername);
+        router.push("/chat");
+    };
 
     useEffect(() => {
-      axios
-        .get("http://localhost:8080/api/trainer/getAllTrainers")
-        .then((response) => {
-          setAllTrainer(response.data);
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error(error);
-          setLoading(false);
-        });
+        const fetchGetAllTrainers = async () => {
+            try {
+                const res = await request("/api/trainer/getAllTrainers", "GET");
+                setAllTrainer(res);
+                setLoading(false);
+            } catch (err) {
+                console.error("Failed to fetch trainers:", err);
+            }
+        };
+        fetchGetAllTrainers();
     }, []);
 
     return (
-        <div className="bg-gray-100 min-h-screen py-10 px-4 max-container-l  ">
-            <h1 className="text-4xl font-bold text-center mb-10 text-black">Choose Your Trainer</h1>
-            <ul className="flex flex-wrap gap-8 mx-auto justify-center">
-                {allTrainers.map((item, index) => (
-                    <li key={index}>
-                        <Card className="w-[400px] bg-white rounded-2xl shadow-md hover:shadow-lg transition duration-300 ease-in-out overflow-hidden h-full flex flex-col justify-between">
-                            <CardHeader className="p-6">
-                                <CardTitle className="text-xl font-semibold text-black">{item.username}</CardTitle>
-                            </CardHeader>
-                            <CardContent className="px-6 pb-4 space-y-2 text-sm text-gray-700">
-                                <CardDescription>
-                                    <span className="font-medium text-gray-900">Bio:</span> {item.bio}
-                                </CardDescription>
-                                <CardDescription>
-                                    <span className="font-medium text-gray-900">Hourly Rate:</span> ${item.hourlyRate}
-                                </CardDescription>
-                                <CardDescription>
-                                    <span className="font-medium text-gray-900">Hourly Wage:</span> ${item.hourlyWage}
-                                </CardDescription>
-                            </CardContent>
-                            <CardFooter className="p-6">
-                                <CustomButton
-                                    label="Chat Trainer"
-                                    width={127}
-                                    height={47}
-                                    rounded={18}
-                                    fontSize="base"
-                                    bold={true}
-                                    backColor="orange"
-                                    onClick={()=>handleChooseTrainer(item.username)}
-                                />
-                            </CardFooter>
-                        </Card>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100 py-16 px-6">
+            <h1 className="text-5xl font-extrabold text-center text-gray-900 mb-16">
+                Choose <span className="text-indigo-600">Your Trainer</span>
+            </h1>
+
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                {allTrainers.map((item) => (
+                    <li key={item.id} className="flex justify-center">
+                        <div className="w-full max-w-sm rounded-3xl p-6 shadow-xl border border-gray-200 bg-white/80 backdrop-blur-lg hover:shadow-indigo-200 transition">
+
+                            <div className="flex justify-center mb-4">
+                                <div className="w-20 h-20 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-4xl shadow-md">
+                                    <UserCircle />
+                                </div>
+                            </div>
+
+                            <div className="text-center text-gray-800 space-y-4">
+                                <h2 className="text-2xl font-bold">{item.username}</h2>
+
+                                <p className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                                    <Info className="w-4 h-4" />
+                                    {item.bio}
+                                </p>
+
+                                <p className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                                    <Mail className="w-4 h-4 text-red-500" />
+                                    {item.email}
+                                </p>
+
+                                <div className="text-sm text-gray-700 space-y-1">
+                                    <div className="flex items-center justify-center gap-2 font-medium text-indigo-700">
+                                        <Users className="w-4 h-4" />
+                                        Clients
+                                    </div>
+                                    <ul className="text-xs text-gray-600 max-h-24 overflow-auto">
+                                        {item.clients && item.clients.length > 0 ? (
+                                            item.clients.map((client, idx) => (
+                                                <li key={idx} className="list-disc list-inside">
+                                                    {client.username || "Unnamed"}
+                                                </li>
+                                            ))
+                                        ) : (
+                                            <li className="italic text-gray-400">No clients</li>
+                                        )}
+                                    </ul>
+                                </div>
+
+                                <div className="text-sm space-y-1 text-gray-700">
+                                    <p className="flex items-center justify-center gap-2">
+                                        <DollarSign className="w-4 h-4 text-green-500" />
+                                        Hourly Rate: <span className="font-semibold">${item.hourlyRate}</span>
+                                    </p>
+                                    <p className="flex items-center justify-center gap-2">
+                                        <DollarSign className="w-4 h-4 text-blue-500" />
+                                        Hourly Wage: <span className="font-semibold">${item.hourlyWage}</span>
+                                    </p>
+                                </div>
+
+                                <div className="mt-4">
+                                    <CustomButton
+                                        label="Chat Trainer"
+                                        width="127"
+                                        height="47"
+                                        rounded="full"
+                                        fontSize="base"
+                                        bold={true}
+                                        backColor="blue"
+                                        onClick={() => handleChooseTrainer(item.username)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     </li>
                 ))}
             </ul>
