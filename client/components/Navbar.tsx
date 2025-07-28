@@ -47,8 +47,11 @@ export const Navbar = () => {
 
                     {isLoggedIn ? (
                         <div className="flex gap-4 items-center">
-                            <Avatar>
-                                <AvatarImage src="https://github.com/shadcn.png" />
+                            <Avatar className="w-[30px] h-[30px] rounded-full ">
+                                <AvatarImage
+                                    src="https://github.com/shadcn.png"
+                                    className="object-cover w-full h-full rounded-full"
+                                />
                                 <AvatarFallback>CN</AvatarFallback>
                             </Avatar>
                             <CustomButton
@@ -61,6 +64,7 @@ export const Navbar = () => {
                                 onClick={handleLogout}
                             />
                         </div>
+
                     ) : (
                         <div className="flex gap-3">
                             <Link href="/auth/login">
