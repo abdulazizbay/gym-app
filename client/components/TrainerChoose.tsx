@@ -18,8 +18,7 @@ export const TrainerChoose = () => {
     const [loading, setLoading] = useState(true);
 
     const handleChooseTrainer = (trainerUsername: string) => {
-        localStorage.setItem("trainerUsername", trainerUsername);
-        router.push("/chat");
+        router.push(`/chat?receiver=${trainerUsername}`);
     };
 
     useEffect(() => {

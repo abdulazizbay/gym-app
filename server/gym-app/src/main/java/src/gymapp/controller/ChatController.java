@@ -2,6 +2,7 @@
 
     import lombok.extern.slf4j.Slf4j;
     import org.springframework.messaging.handler.annotation.MessageMapping;
+    import org.springframework.security.core.annotation.AuthenticationPrincipal;
     import org.springframework.stereotype.Controller;
     import org.springframework.messaging.simp.SimpMessagingTemplate;
     import src.gymapp.model.ChatMessage;
@@ -19,16 +20,23 @@
             this.messagingTemplate = messagingTemplate;
         }
 
+//        @MessageMapping("/chat.sendMessage")
+//        public void sendPrivateMessage(ChatMessage message) {
+//            log.info("Message from '{}' to '{}': {}", message.getSender(), message.getReceiver(), message.getContent());
+//
+//            messagingTemplate.convertAndSendToUser(
+//                    message.getReceiver(),
+//                    "/queue/messages",
+//                    message
+//            );
+//        }
         @MessageMapping("/chat.sendMessage")
-        public void sendPrivateMessage(ChatMessage message) {
-            log.info("Message from '{}' to '{}': {}", message.getSender(), message.getReceiver(), message.getContent());
+        public void sendPrivateMessage(@AuthenticationPrincipal String username, ChatMessage message) {
+            log.info("Message from '{}' to '{}': {}", username, message.getReceiver(), message.getContent());
 
-            messagingTemplate.convertAndSendToUser(
-                    message.getReceiver(),
-                    "/queue/messages",
-                    message
-            );
+            messagingTemplate.convertAndSendToUser(message.getReceiver(), "/queue/messages", message);
         }
+
 
         @MessageMapping("/chat.addUser")
         public void addUser(ChatMessage message) {

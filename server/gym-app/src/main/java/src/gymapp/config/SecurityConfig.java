@@ -33,7 +33,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/user/login").permitAll()
                         .requestMatchers("/api/client/register").permitAll()
+                        .requestMatchers("api/trainer/getAllTrainers").permitAll()
                         .requestMatchers("/api/trainer/**").hasRole("ADMIN")
+                        .requestMatchers("/ws/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

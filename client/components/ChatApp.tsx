@@ -4,6 +4,8 @@ import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import {useRouter} from "next/navigation";
 import { toast } from "sonner"
+import { useSearchParams } from "next/navigation";
+import {jwtDecode} from "jwt-decode";
 const colors = [
     '#2196F3', '#32c787', '#00BCD4', '#ff5652',
     '#ffc107', '#ff85af', '#FF9800', '#39bbb0'
@@ -20,69 +22,62 @@ function getAvatarColor(sender) {
 
 export default function ChatApp() {
     const router = useRouter();
-    const [username, setUsername] = useState('');
-    const [enteredUsername, setEnteredUsername] = useState(false);
-    const [connecting, setConnecting] = useState(false);
+    const searchParams = useSearchParams();
+
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") || "" : "";
+
+    const [username, setUsername] = useState("");
+    const [receiver, setReceiver] = useState(searchParams.get("receiver") || "");
     const [messages, setMessages] = useState([]);
-    const [messageInput, setMessageInput] = useState('');
+    const [messageInput, setMessageInput] = useState("");
+    const [enteredUsername, setEnteredUsername] = useState(false);
+
     const stompClient = useRef(null);
-    const messageAreaRef = useRef(null);
-    const [receiver, setReceiver] = useState('');
 
     useEffect(() => {
-        if (messageAreaRef.current) {
-            messageAreaRef.current.scrollTop = messageAreaRef.current.scrollHeight;
+        if (!token) {
+            toast("Login first");
+            router.push("/auth/login");
+            return;
         }
-    }, [messages]);
-    useEffect(() => {
-        if (username && receiver && !enteredUsername) {
-            connect(username);
-        }
-    }, [username, receiver]);
 
-    useEffect(() => {
-        const storedUsername = localStorage.getItem("username");
-        const storedTrainerUsername = localStorage.getItem("trainerUsername");
-        const storedClientUsername = localStorage.getItem("clientUsername");
+        try {
+            const decoded = jwtDecode(token);
+            const extractedUsername = decoded.sub || decoded.username;
 
-        if (storedUsername) {
-            setUsername(storedUsername);
+            if (!extractedUsername) throw new Error("Invalid token");
 
-            if (storedUsername === storedTrainerUsername && storedClientUsername) {
-                setReceiver(storedClientUsername);
-            } else if (storedTrainerUsername) {
-                setReceiver(storedTrainerUsername);
+            setUsername(extractedUsername);
+
+            const trainer = localStorage.getItem("trainerUsername");
+            const client = localStorage.getItem("clientUsername");
+
+            if (extractedUsername === trainer && client) {
+                setReceiver(client);
+            } else if (trainer) {
+                setReceiver(trainer);
             }
-        }
-        else {
-            toast("Login first")
-            router.push("/auth/login")
+
+        } catch (error) {
+            toast("Invalid token");
+            router.push("/auth/login");
         }
     }, []);
 
-
-
     useEffect(() => {
-        if (username && !enteredUsername) {
-            connect(username);
+        if (username && receiver && !enteredUsername) {
+            connect();
         }
-    }, [username]);
+    }, [username, receiver]);
 
-
-    const connect = (e) => {
-        // e.preventDefault();
+    const connect = () => {
         if (!username.trim()) return;
 
-        setConnecting(true);
-
-        const socket = new SockJS('http://localhost:8080/ws');
         stompClient.current = new Client({
             webSocketFactory: () => new SockJS("http://localhost:8080/ws"),
             connectHeaders: {
+                Authorization: `Bearer ${token}`,
                 username: username,
-            },
-            debug: (str) => {
-                // console.log(str);
             },
             onConnect: () => {
                 stompClient.current.subscribe("/user/queue/messages", onMessageReceived);
@@ -96,15 +91,13 @@ export default function ChatApp() {
                     }),
                 });
 
-
                 setEnteredUsername(true);
-                setConnecting(false);
             },
             onStompError: (frame) => {
                 console.error("STOMP error:", frame);
-                toast("could not connect")
-                setConnecting(false);
+                toast("Could not connect");
             },
+            debug: () => {},
         });
 
         stompClient.current.activate();
@@ -127,19 +120,15 @@ export default function ChatApp() {
                 body: JSON.stringify(chatMessage),
             });
 
-            setMessageInput('');
+            setMessageInput("");
         }
     };
 
-
-
-
     const onMessageReceived = (message) => {
         const msg = JSON.parse(message.body);
-        console.log("Message received on frontend:", msg);
+        console.log("Received:", msg);
 
         if (msg.type === "JOIN" && msg.sender !== username) {
-            console.log("Storing clientUsername for trainer:", msg.sender);
             localStorage.setItem("clientUsername", msg.sender);
             setReceiver(msg.sender);
         }
@@ -147,18 +136,17 @@ export default function ChatApp() {
         setMessages((prev) => [...prev, msg]);
     };
 
-
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 text-black">
 
 
                 <div className="bg-white shadow-lg rounded-lg max-w-3xl w-full flex flex-col h-[600px]">
                     <header className="p-4 border-b border-gray-300 text-center font-semibold text-lg">
-                        Spring WebSocket Chat Demo - By Alibou
+                        Chat
                     </header>
 
                     <div
-                        ref={messageAreaRef}
+                        // ref={messageAreaRef}
                         className="flex-1 overflow-y-auto p-4 space-y-3 bg-white"
                     >
                         {messages.length === 0 && (

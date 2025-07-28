@@ -16,7 +16,6 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-
 const FormSchema = z.object({
     email: z.string().email({ message: "Invalid email" }),
     password: z.string().min(6, { message: "Min 6 characters" }),
@@ -41,6 +40,9 @@ export default function LoginForm() {
 
             if (data.token) {
                 localStorage.setItem("token", data.token);
+
+
+
                 await router.push("/");
             } else {
                 toast("Login failed: no token received.");
@@ -49,6 +51,7 @@ export default function LoginForm() {
             toast.error(err.message || "Failed to login");
         }
     };
+
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-600 p-6">

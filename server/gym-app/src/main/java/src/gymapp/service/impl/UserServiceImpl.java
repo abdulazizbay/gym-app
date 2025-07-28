@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
         }
 
 
-        return jwtUtil.generateToken(user.getEmail(), getRole(user));
+        return jwtUtil.generateToken(user.getUsername(), getRole(user));
 
 
     }

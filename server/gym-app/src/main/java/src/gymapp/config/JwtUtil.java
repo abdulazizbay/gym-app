@@ -40,6 +40,14 @@ public class JwtUtil {
     public String extractRole(String token) {
         return (String) getClaims(token).get("role");
     }
+    public boolean validateToken(String token) {
+        try {
+            getClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
 
     private Claims getClaims(String token) {
         return Jwts.parserBuilder()
